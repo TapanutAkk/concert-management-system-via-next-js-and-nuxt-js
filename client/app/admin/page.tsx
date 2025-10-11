@@ -2,7 +2,8 @@
 
 import StatCard from '@/components/dashboard/StatCard';
 import ConcertListItem from '@/components/dashboard/ConcertListItem';
-import { useState } from 'react';
+import ConcertForm from '@/components/dashboard/ConcertForm';
+import React, { useState } from 'react';
 // const NU_XT_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'; 
 
 // async function getStats() {
@@ -91,7 +92,13 @@ export default function AdminHomePage() {
               ))}
             </div>
             }
-            {activeTab === 'Create' && <div>เนื้อหาสำหรับ Create Form</div>}
+            {activeTab === 'Create' && 
+            <div>
+              <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+                <ConcertForm />
+              </div>
+            </div>
+            }
           </div>
         </div>
     );
