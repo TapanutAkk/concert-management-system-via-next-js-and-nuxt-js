@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getHello, postMessage } from '../services/api';
 
-export default function HomePage() {
+export default function Page() {
   const [message, setMessage] = useState('Loading...');
   const [name, setName] = useState('');
   const [topic, setTopic] = useState('');
