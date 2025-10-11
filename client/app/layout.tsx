@@ -1,5 +1,6 @@
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
+import './global.css'
 
 interface AdminLayoutProps {
   children: React.ReactNode;

@@ -1,16 +1,16 @@
 import Link from 'next/link';
-import { Home, History, Users, LogOut, ArrowLeftRight } from 'lucide-react';
+import { Home, Inbox, RefreshCcw, LogOut } from 'lucide-react';
 
 const navItems = [
   { name: 'Home', href: '/admin', icon: Home },
-  { name: 'History', href: '/admin/history', icon: History },
-  { name: 'Switch to user', href: '/user', icon: ArrowLeftRight },
+  { name: 'History', href: '/admin/history', icon: Inbox },
+  { name: 'Switch to user', href: '/user', icon: RefreshCcw },
 ];
 
 export default function Sidebar() {
   return (
-    <div className="flex flex-col w-64 bg-gray-800 text-white min-h-screen">
-      <div className="p-6 text-2xl font-semibold border-b border-gray-700">
+    <div className="flex flex-col w-64 min-h-screen bg-white">
+      <div className="p-6 text-2xl font-semibold">
         Admin
       </div>
 
@@ -19,8 +19,7 @@ export default function Sidebar() {
           <Link
             key={item.name}
             href={item.href}
-            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200 
-                       text-gray-200 hover:text-white" 
+            className="flex items-center space-x-3 p-3 rounded-lg transition-colors duration-200" 
           >
             <item.icon className="w-5 h-5" />
             <span>{item.name}</span>
@@ -28,13 +27,15 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="px-4 py-4 border-t border-gray-700">
-        <button 
-          className="flex items-center space-x-3 p-3 w-full rounded-lg text-gray-400 hover:bg-red-600 hover:text-white transition-colors duration-200"
-        >
+      <div className="px-4 py-4">
+          <Link
+            key='LogOut'
+            href=''
+            className="flex items-center space-x-3 p-3 rounded-lg transition-colors duration-200" 
+          >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
-        </button>
+        </Link>
       </div>
     </div>
   );
