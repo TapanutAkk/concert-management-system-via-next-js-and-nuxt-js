@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { concertSchema } from '@/schemas/concertSchema'; 
 
-const NEST_JS_API_URL = 'http://localhost:3001/concerts'; 
+const NEST_JS_API_URL = 'http://localhost:3001/concerts';
 
 export default function ConcertForm() {
 
