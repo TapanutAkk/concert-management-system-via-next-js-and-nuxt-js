@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, UsePipes } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, Get } from '@nestjs/common';
 import { ConcertsService } from './concerts.service';
 import * as createConcertDto from './dto/create-concert.dto';
 import { ZodValidationPipe } from './pipes/zod-validation.pipe';
@@ -32,6 +32,23 @@ export class ConcertsController {
         }
       }
       
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Get()
+  async findAll() {
+    try {
+      const concerts = await this.concertsService.findAll();
+
+      return {
+        status: concerts.length > 0 ? true : false,
+        count: concerts.length,
+        data: concerts,
+      };
+
+    } catch (error) {
+      console.error('Error fetching concerts:', error);
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
