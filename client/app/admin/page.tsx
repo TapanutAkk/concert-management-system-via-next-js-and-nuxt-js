@@ -84,11 +84,9 @@ export default function AdminHomePage() {
             {activeTab === 'Overview' && 
             <div>
               {concerts.map((concert: any) => (
-              <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                  <ConcertListItem key={concert.id} concert={concert} onDelete={function (concertId: string | number): void {
-                    throw new Error('Function not implemented.');
-                  } } />
-              </div>
+                <ConcertListItem key={concert.id} concert={concert} onDelete={function (concertId: string | number): void {
+                  throw new Error('Function not implemented.');
+                } } />
               ))}
             </div>
             }
