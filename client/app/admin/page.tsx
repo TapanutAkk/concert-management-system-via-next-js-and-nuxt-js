@@ -17,16 +17,6 @@ const NEST_JS_API_URL = 'http://localhost:3001/concerts';
 //   return res.json();
 // }
 
-async function getConcerts() {
-  const res = await fetch(NEST_JS_API_URL, {
-    method: 'GET',
-    headers: {
-        'Content-Type': 'application/json',
-    }
-  });
-
-  return res.json();
-}
 const tabs = [
   { name: 'Overview', href: '#overview' },
   { name: 'Create', href: '#create' }
@@ -51,20 +41,6 @@ export default function AdminHomePage() {
     reserved: 350,
     cancelled: 25,
   };
-  // const concerts = [
-  //   { 
-  //     id: 1, 
-  //     name: 'Concert A', 
-  //     description: 'Lorem ipsum dolor sit amet consectetur. Elit purus nam gravida porttitor nibh urna sit ornare a. Proin dolor morbi id ornare aenean non. Fusce dignissim turpis sed non est orci sed in. Blandit ut purus nunc sed donec commodo morbi diam scelerisque.', 
-  //     totalSeats: 290 
-  //   },
-  //   { 
-  //     id: 2, 
-  //     name: 'Concert B', 
-  //     description: 'Lorem ipsum dolor sit amet consectetur. Elit purus nam gravida porttitor nibh urna sit ornare a. ', 
-  //     totalSeats: 200 
-  //   },
-  // ];
 
   const [activeTab, setActiveTab] = useState('Overview'); 
 
@@ -82,13 +58,11 @@ export default function AdminHomePage() {
         }
 
         const result = await response.json();
-        // NestJS API คืนค่าเป็น { count: number, data: Concert[] }
         setConcerts(result.data); 
         
     } catch (err) {
         console.error('Fetch Error:', err);
-        // 💡 จัดการ Error: Cannot connect to the server. Please check your network connection.
-        setError('ไม่สามารถเชื่อมต่อ Server ได้ โปรดตรวจสอบ Network'); 
+        setError('Failed to connect to the server. Check network status.'); 
     } finally {
         setIsLoading(false);
     }
@@ -97,6 +71,27 @@ export default function AdminHomePage() {
   useEffect(() => {
     fetchConcerts();
   }, []);
+
+  const deleteConcert = async (concertId) => {
+    try {
+        const response = await fetch(`${NEST_JS_API_URL}/${concertId}`, {
+            method: 'DELETE',
+        });
+  
+        if (response.status === 204) {
+            fetchConcerts();
+        } else if (response.status === 404) {
+             alert('Cannot delete: Concert not found.');
+        } else {
+             const errorResult = await response.json();
+             alert(`Delete Failed: ${errorResult.message}`);
+        }
+  
+    } catch (error) {
+        console.error("Network Error:", error);
+        alert('Failed to connect to the server. Check network status.');
+    }
+  }
 
   return (
       <div>
@@ -146,7 +141,7 @@ export default function AdminHomePage() {
             )}
             {concerts.map((concert: any) => (
               <ConcertListItem key={concert.id} concert={concert} onDelete={function (concertId: string | number): void {
-                throw new Error('Function not implemented.');
+                deleteConcert(concertId);
               } } />
             ))}
           </div>

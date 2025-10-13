@@ -1,7 +1,8 @@
 'use client';
 
 import { User, Trash2 } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface Concert {
   id: number | string;
@@ -16,10 +17,32 @@ interface ConcertListItemProps {
 }
 
 export default function ConcertListItem({ concert, onDelete }: ConcertListItemProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [concertToDelete, setConcertToDelete] = useState<Concert | null>(null);
   
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete ${concert.name}?`)) {
+    openDeleteModal(concert);
+  };
+
+  const openDeleteModal = (concert: Concert) => {
+    setConcertToDelete(concert);
+    setIsModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setConcertToDelete(null);
+    setIsModalOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!concertToDelete) return;
+
+    try {
       onDelete(concert.id);
+    } catch (error) {
+      alert('Failed to connect to the server. Check network status.');
+    } finally {
+      closeDeleteModal();
     }
   };
 
@@ -47,6 +70,16 @@ export default function ConcertListItem({ concert, onDelete }: ConcertListItemPr
             </button>
         </div>
       </div>
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        title=""
+        message={`Are you sure you want to delete?`}
+        concertName={`${concertToDelete?.name}`}
+        isDanger={true}
+        confirmText="Yes, Delete"
+      />
     </div>
   );
 }

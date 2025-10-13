@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, Get } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, Get, Delete, Param } from '@nestjs/common';
 import { ConcertsService } from './concerts.service';
 import * as createConcertDto from './dto/create-concert.dto';
 import { ZodValidationPipe } from './pipes/zod-validation.pipe';
@@ -49,6 +49,26 @@ export class ConcertsController {
 
     } catch (error) {
       console.error('Error fetching concerts:', error);
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Delete(':id') 
+  @HttpCode(HttpStatus.NO_CONTENT) 
+  async remove(@Param('id') id: string) {
+    try {
+      await this.concertsService.remove(id);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') { 
+          throw new HttpException(
+            `Not Found Concert ID: ${id}`,
+            HttpStatus.NOT_FOUND,
+          );
+        }
+      }
+      
+      console.error('Delete Error:', error);
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
