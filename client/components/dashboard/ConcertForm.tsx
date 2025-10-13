@@ -1,14 +1,18 @@
 'use client';
 
 import { Save, User } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { concertSchema } from '@/schemas/concertSchema'; 
+import SuccessToast from '@/components/ui/SuccessToast';
 
 const NEST_JS_API_URL = 'http://localhost:3001/concerts';
 
+type View = 'overview' | 'create';
+
 export default function ConcertForm() {
+  const [currentView, setCurrentView] = useState<View>('create');
 
   const formMethods = useForm({
     resolver: zodResolver(concertSchema),
@@ -21,6 +25,18 @@ export default function ConcertForm() {
     setError,
     reset 
   } = formMethods;
+
+  const [toast, setToast] = useState<{ isVisible: boolean, message: string }>({ 
+    isVisible: false, 
+    message: '' 
+  });
+
+  const closeToast = () => setToast({ isVisible: false, message: '' });
+
+  const showSuccessToast = (message: string) => {
+      setToast({ isVisible: true, message });
+      setTimeout(closeToast, 3000); 
+  };
 
   const onSubmit = async (formData: any) => {
     try {
@@ -36,38 +52,35 @@ export default function ConcertForm() {
         const result = await response.json();
 
         if (response.ok) {
-            console.log("Concert Creation Success:", result);
-            alert(`Concert Creation Success: ${result.concert.name}`);
-            reset();
-            
+          reset();
+          showSuccessToast('Create successfully');
         } else if (response.status === 400) {
-            console.error("Server Validation Failed (400):", result);
-            
-            if (result.errors && Array.isArray(result.errors)) {
-                result.errors.forEach(err => {
-                    setError(err.path, { 
-                        type: 'server', 
-                        message: err.message 
-                    });
-                });
-            } else {
-                alert('Data validation failed.');
-            }
-
+          console.error("Server Validation Failed (400):", result);
+          
+          if (result.errors && Array.isArray(result.errors)) {
+              result.errors.forEach(err => {
+                  setError(err.path, { 
+                      type: 'server', 
+                      message: err.message 
+                  });
+              });
+          } else {
+              alert('Data validation failed.');
+          }
         } else if (response.status === 409) {
-            console.error("Conflict Error (409):", result.message);
-            setError('concertName', { 
-                type: 'server', 
-                message: result.message 
-            });
+          console.error("Conflict Error (409):", result.message);
+          setError('concertName', { 
+              type: 'server', 
+              message: result.message 
+          });
         } else {
-            console.error("Server Error:", result.message);
-            alert(`Error: ${result.message || 'An unexpected error occurred.'}`);
+          console.error("Server Error:", result.message);
+          alert(`Error: ${result.message || 'An unexpected error occurred.'}`);
         }
 
     } catch (error) {
-        console.error('Network Error:', error);
-        alert('Failed to connect to the server. Check network status.');
+      console.error('Network Error:', error);
+      alert('Failed to connect to the server. Check network status.');
     }
   };
 
@@ -148,6 +161,11 @@ export default function ConcertForm() {
             </button>
           </div>
         </form>
+        <SuccessToast
+            isVisible={toast.isVisible}
+            message={toast.message}
+            onClose={closeToast}
+        />
       </div>
   );
 }

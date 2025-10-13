@@ -37,4 +37,10 @@ export class ConcertsService {
     const result: any[] = await this.prisma.$queryRaw`SELECT COUNT(*) FROM "Concert"`;
     return Number(result[0].count);
   }
+
+  async remove(id: string): Promise<Concert> {
+    return this.prisma.concert.delete({
+      where: { id },
+    });
+  }
 }
