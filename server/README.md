@@ -57,6 +57,33 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Run Database Container (Local)
+Ensure you have Docker Desktop installed. Run the following command in your terminal to start a PostgreSQL container with the required credentials:
+
+```bash
+# Start PostgreSQL Container on port 5432
+# Username: myuser
+# Password: mypassword
+# Database: nest_db
+$ docker run --name my-postgres -e POSTGRES_USER=myuser -e POSTGRES_PASSWORD=mypassword -e POSTGRES_DB=nest_db -p 5432:5432 -d postgres:latest
+```
+
+## Configure Environment Variables
+Create a file named .env in the root of your project and configure the DATABASE_URL using the credentials from the Docker setup above:
+
+# .env
+
+# PostgreSQL connection string
+DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/nest_db"
+
+## Apply Database Schema (Create Tables)
+Once the database container is running and the .env file is set up, run the Prisma migration command to create the necessary tables (including the Concert table) in your local database:
+
+```bash
+# Run Prisma Migrations to create the tables based on schema.prisma
+$ npx prisma migrate dev --name init_concert_table
+```
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

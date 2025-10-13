@@ -6,18 +6,69 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { concertSchema } from '@/schemas/concertSchema'; 
 
+const NEST_JS_API_URL = 'http://localhost:3001/concerts'; 
+
 export default function ConcertForm() {
+
+  const formMethods = useForm({
+    resolver: zodResolver(concertSchema),
+  });
 
   const { 
     register, 
     handleSubmit, 
-    formState: { errors, isSubmitting } 
-  } = useForm({
-    resolver: zodResolver(concertSchema),
-  });
+    formState: { errors, isSubmitting },
+    setError,
+    reset 
+  } = formMethods;
 
-  const onSubmit = (data: any) => {
-    console.log("Form Data is valid:", data);
+  const onSubmit = async (formData: any) => {
+    try {
+        const response = await fetch(NEST_JS_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+
+            body: JSON.stringify(formData), 
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            console.log("Concert Creation Success:", result);
+            alert(`Concert Creation Success: ${result.concert.name}`);
+            reset();
+            
+        } else if (response.status === 400) {
+            console.error("Server Validation Failed (400):", result);
+            
+            if (result.errors && Array.isArray(result.errors)) {
+                result.errors.forEach(err => {
+                    setError(err.path, { 
+                        type: 'server', 
+                        message: err.message 
+                    });
+                });
+            } else {
+                alert('Data validation failed.');
+            }
+
+        } else if (response.status === 409) {
+            console.error("Conflict Error (409):", result.message);
+            setError('concertName', { 
+                type: 'server', 
+                message: result.message 
+            });
+        } else {
+            console.error("Server Error:", result.message);
+            alert(`Error: ${result.message || 'An unexpected error occurred.'}`);
+        }
+
+    } catch (error) {
+        console.error('Network Error:', error);
+        alert('Failed to connect to the server. Check network status.');
+    }
   };
 
   return (
