@@ -72,4 +72,20 @@ export class ConcertsController {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @Get('seats')
+  async getSeatSum() {
+    try {
+      const totalSeat = await this.concertsService.getSeatSum();
+
+      return {
+        status: totalSeat > 0 ? true : false,
+        data: totalSeat,
+      };
+
+    } catch (error) {
+      console.error('Error fetching concerts:', error);
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

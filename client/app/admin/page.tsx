@@ -7,15 +7,21 @@ import React, { useState, useEffect } from 'react';
 
 const NEST_JS_API_URL = 'http://localhost:3001/concerts';
 
-// async function getStats() {
-//   const res = await fetch(`${NU_XT_API_URL}/api/admin/stats`, {
-//     cache: 'no-store',
-//   });
-//   if (!res.ok) {
-//     throw new Error('Failed to fetch stats');
-//   }
-//   return res.json();
-// }
+async function sumTotalSeat() {
+  const response = await fetch(`${NEST_JS_API_URL}/seats`, {
+    method: 'GET',
+  });
+
+  if (!response.ok) {
+    const errorResult = await response.json();
+    throw new Error(errorResult.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+const sumSeat = sumTotalSeat();
 
 const tabs = [
   { name: 'Overview', href: '#overview' },
@@ -31,10 +37,33 @@ interface Concert {
 }
 
 export default function AdminHomePage() {
-  // const [stats, concerts] = await Promise.all([getStats(), getConcerts()]);
+  // const [sumTotalSeat] = await Promise.all([sumTotalSeat()]);
   const [concerts, setConcerts] = useState<Concert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalSeats, setTotalSeats] = useState<number | null>(null);
+
+  const fetchSeatSum = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${NEST_JS_API_URL}/seats`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch total seats data');
+      }
+
+      const result = await response.json();
+      setTotalSeats(result.data);
+    } catch (err) {
+      console.error('Fetch Error:', err);
+      setError('ไม่สามารถเชื่อมต่อเพื่อดึงผลรวมที่นั่งได้'); 
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const stats = {
     totalSeats: 1000,
@@ -70,6 +99,7 @@ export default function AdminHomePage() {
 
   useEffect(() => {
     fetchConcerts();
+    fetchSeatSum();
   }, []);
 
   const deleteConcert = async (concertId) => {
@@ -80,6 +110,7 @@ export default function AdminHomePage() {
   
         if (response.status === 204) {
             fetchConcerts();
+            fetchSeatSum();
         } else if (response.status === 404) {
              alert('Cannot delete: Concert not found.');
         } else {
@@ -96,7 +127,7 @@ export default function AdminHomePage() {
   return (
       <div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatCard title="Total of seats" value={stats.totalSeats} color="blue" logo="seats" />
+          <StatCard title="Total of seats" value={totalSeats?.toLocaleString() || 0} color="blue" logo="seats" />
           <StatCard title="Reserve" value={stats.reserved} color="green"  logo="reserve" />
           <StatCard title="Cancel" value={stats.cancelled} color="red"  logo="cancel" />
         </div>
@@ -111,6 +142,7 @@ export default function AdminHomePage() {
                 setActiveTab(tab.name);
                 if(tab.name == 'Overview') {
                   fetchConcerts();
+                  fetchSeatSum();
                 }
               }}
               className={`
