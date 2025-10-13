@@ -33,9 +33,14 @@ export class ConcertsService {
     });
   }
   
-  async getConcertCount(): Promise<number> {
-    const result: any[] = await this.prisma.$queryRaw`SELECT COUNT(*) FROM "Concert"`;
-    return Number(result[0].count);
+  async getSeatSum(): Promise<number> {
+    const result = await this.prisma.concert.aggregate({
+      _sum: {
+          totalSeats: true,
+      },
+    });
+
+    return result._sum.totalSeats || 0; 
   }
 
   async remove(id: string): Promise<Concert> {
