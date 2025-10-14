@@ -1,1 +1,0 @@
-# my-next-nuxt-monorepo
