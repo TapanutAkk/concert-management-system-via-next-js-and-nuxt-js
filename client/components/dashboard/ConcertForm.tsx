@@ -9,11 +9,7 @@ import SuccessToast from '@/components/ui/SuccessToast';
 
 const NEST_JS_API_URL = 'http://localhost:3001/concerts';
 
-type View = 'overview' | 'create';
-
 export default function ConcertForm() {
-  const [currentView, setCurrentView] = useState<View>('create');
-
   const formMethods = useForm({
     resolver: zodResolver(concertSchema),
   });

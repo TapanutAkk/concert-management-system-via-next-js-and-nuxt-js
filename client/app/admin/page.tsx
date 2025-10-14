@@ -168,7 +168,7 @@ export default function AdminHomePage() {
             {error && (
               <div className="p-6 text-center text-red-600">Error: {error}</div>
             )}
-            {concerts.length == 0 && (
+            {concerts.length == 0 && !isLoading && (
               <div className="p-6 text-center text-gray-500">No concerts found.</div>
             )}
             {concerts.map((concert: any) => (
