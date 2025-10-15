@@ -75,7 +75,7 @@ export class ConcertsService {
   }
 
   async findAllAvailableForUser(userName: string) {
-    const concerts = await this.prisma.concert.findMany({});
+    const concerts = await this.prisma.concert.findMany({orderBy: { createdAt: 'desc' }});
     
     const allUserLogs = await this.prisma.reservationLog.findMany({
       where: { userName: userName },
