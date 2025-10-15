@@ -14,7 +14,7 @@ interface Concert {
   createdAt: string;
 }
 
-export default function AdminHomePage() {
+export default function UserHomePage() {
   const [concerts, setConcerts] = useState<Concert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
