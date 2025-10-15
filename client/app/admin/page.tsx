@@ -59,7 +59,7 @@ export default function AdminHomePage() {
       setTotalSeats(result.data);
     } catch (err) {
       console.error('Fetch Error:', err);
-      setError('ไม่สามารถเชื่อมต่อเพื่อดึงผลรวมที่นั่งได้'); 
+      setError('Failed to connect for data retrieval.'); 
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +83,7 @@ export default function AdminHomePage() {
 
         if (!response.ok) {
             const errorResult = await response.json();
-            throw new Error(errorResult.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
+            throw new Error(errorResult.message || 'Failed to fetch data');
         }
 
         const result = await response.json();
