@@ -1,8 +1,12 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, Get, Delete, Param } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, Get, Delete, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ConcertsService } from './concerts.service';
 import * as createConcertDto from './dto/create-concert.dto';
 import { ZodValidationPipe } from './pipes/zod-validation.pipe';
 import { Prisma } from '@prisma/client';
+
+class UserActionDto {
+  userName: string; 
+}
 
 @Controller('concerts')
 export class ConcertsController {
@@ -87,5 +91,36 @@ export class ConcertsController {
       console.error('Error fetching concerts:', error);
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  @Get('user/:userName')
+  async findAllAvailableForUser(@Param('userName') userName: string) {
+    try {
+      const concerts = await this.concertsService.findAllAvailableForUser(userName);
+      return {
+          status: concerts.length > 0 ? true : false,
+          count: concerts.length,
+          data: concerts,
+      };
+    } catch (error) {
+      console.error('Error fetching user concerts:', error);
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('reserve/:id')
+  reserve(
+    @Param('id', ParseUUIDPipe) concertId: string, 
+    @Body() body: UserActionDto 
+  ) {
+    return this.concertsService.logReservation(concertId, body.userName);
+  }
+
+  @Post('cancel/:id')
+  cancel(
+    @Param('id', ParseUUIDPipe) concertId: string, 
+    @Body() body: UserActionDto 
+  ) {
+    return this.concertsService.logCancellation(concertId, body.userName);
   }
 }
