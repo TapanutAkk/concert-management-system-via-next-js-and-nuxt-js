@@ -3,7 +3,8 @@
 import ConcertBuyItem from '@/components/dashboard/ConcertBuyItem';
 import React, { useState, useEffect } from 'react';
 
-const NEST_JS_API_URL = 'http://localhost:3001/concerts';
+const NEST_JS_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const CURRENT_USER_NAME = 'Jack Smile';
 
 interface Concert {
   id: string;
@@ -13,7 +14,7 @@ interface Concert {
   createdAt: string;
 }
 
-export default function AdminHomePage() {
+export default function UserHomePage() {
   const [concerts, setConcerts] = useState<Concert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,13 +23,13 @@ export default function AdminHomePage() {
     setIsLoading(true);
     setError(null);
     try {
-        const response = await fetch(NEST_JS_API_URL, {
+        const response = await fetch(`${NEST_JS_API_URL}/concerts/user/${CURRENT_USER_NAME}`, {
             method: 'GET',
         });
 
         if (!response.ok) {
             const errorResult = await response.json();
-            throw new Error(errorResult.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
+            throw new Error(errorResult.message || 'Failed to fetch data');
         }
 
         const result = await response.json();
@@ -46,6 +47,26 @@ export default function AdminHomePage() {
     fetchConcerts();
   }, []);
 
+  const handleReserve = async (concertId: string | number) => {
+    await fetch(`${NEST_JS_API_URL}/concerts/reserve/${concertId}`, { 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userName: CURRENT_USER_NAME })
+    });
+
+    fetchConcerts();
+  };
+
+  const handleCancel = async (concertId: string | number) => {
+    await fetch(`${NEST_JS_API_URL}/concerts/cancel/${concertId}`, { 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userName: CURRENT_USER_NAME }),
+    });
+
+    fetchConcerts();
+  };
+
   return (
     <div>
       <div className="mt-4">
@@ -60,7 +81,12 @@ export default function AdminHomePage() {
             <div className="p-6 text-center text-gray-500">No concerts found.</div>
           )}
           {concerts.map((concert: any) => (
-            <ConcertBuyItem key={concert.id} concert={concert} />
+            <ConcertBuyItem 
+              key={concert.id} 
+              concert={concert}
+              onReserve={handleReserve} 
+              onCancel={handleCancel} 
+            />
           ))}
         </div>
       </div>
