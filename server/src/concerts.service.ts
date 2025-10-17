@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from './prisma/prisma.service';
 import { CreateConcertDto } from './dto/create-concert.dto';
 import { Concert, Action, ReservationLog } from '@prisma/client';
@@ -36,7 +36,7 @@ export class ConcertsService {
   async getSeatSum(): Promise<number> {
     const result = await this.prisma.concert.aggregate({
       _sum: {
-          totalSeats: true,
+        totalSeats: true,
       },
     });
 
@@ -49,7 +49,10 @@ export class ConcertsService {
     });
   }
 
-  private async getCurrentUserStatus(concertId: string, userName: string): Promise<Action | null> {
+  private async getCurrentUserStatus(
+    concertId: string,
+    userName: string,
+  ): Promise<Action | null> {
     const latestLog = await this.prisma.reservationLog.findFirst({
       where: { concertId, userName },
       orderBy: { createdAt: 'desc' },
@@ -57,39 +60,75 @@ export class ConcertsService {
     });
     return latestLog?.action || null;
   }
-  
+
   private async updateConcertReservedCount(concertId: string) {
-      const reserveCount = await this.prisma.reservationLog.count({
-          where: { concertId, action: Action.RESERVE }
-      });
-      const cancelCount = await this.prisma.reservationLog.count({
-          where: { concertId, action: Action.CANCEL }
-      });
+    const reserveCount = await this.prisma.reservationLog.count({
+      where: { concertId, action: Action.RESERVE }
+    });
+    const cancelCount = await this.prisma.reservationLog.count({
+      where: { concertId, action: Action.CANCEL }
+    });
 
-      const newReservedCount = reserveCount - cancelCount;
+    const newReservedCount = reserveCount - cancelCount;
 
-      await this.prisma.concert.update({
-          where: { id: concertId },
-          data: { reservedCount: newReservedCount }
-      });
+    await this.prisma.concert.update({
+      where: { id: concertId },
+      data: { reservedCount: newReservedCount }
+    });
   }
 
-  async findAllAvailableForUser(userName: string) {
-    const concerts = await this.prisma.concert.findMany({orderBy: { createdAt: 'desc' }});
+  async findAllAvailableForUser(userName: string): Promise<(Concert & { latestAction?: Action | null })[]> {
+    const concerts = await this.prisma.concert.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
     
     const allUserLogs = await this.prisma.reservationLog.findMany({
       where: { userName: userName },
       orderBy: { createdAt: 'desc' },
     });
 
-    return concerts.map(concert => {
-      const latestLog = allUserLogs.find(log => log.concertId === concert.id);
+    return concerts.map((concert) => {
+      const latestLog = allUserLogs.find((log) => log.concertId === concert.id);
 
       const latestAction = latestLog?.action || null; 
       
       return {
         ...concert,
         latestAction: latestAction,
+      };
+    });
+  }
+
+  async findAllReservationLogs(
+    userName: string
+  ): Promise<(ReservationLog & { concertName?: string; formattedAt: string })[]> {
+    const whereClause = userName ? { userName } : {};
+    const logs = await this.prisma.reservationLog.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const concerts = await this.prisma.concert.findMany({});
+
+    const formatDateTime = (input: Date | string) => {
+      const d = input instanceof Date ? input : new Date(input);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+      return `${y}-${m}-${day} ${hh}:${mm}:${ss}`;
+    };
+
+    return logs.map((log) => {
+      const concert = concerts.find((c) => c.id === log.concertId);
+
+      // ไม่เขียนทับ createdAt (ยังคงเป็น Date) — เพิ่ม formattedAt เป็น string แยกต่างหาก
+      return {
+        ...log,
+        concertName: concert?.name,
+        formattedAt: formatDateTime(log.createdAt),
       };
     });
   }

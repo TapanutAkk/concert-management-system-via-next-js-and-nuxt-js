@@ -123,4 +123,19 @@ export class ConcertsController {
   ) {
     return this.concertsService.logCancellation(concertId, body.userName);
   }
+
+  @Get('log/:userName')
+  async findAllReservationLogs(@Param('userName') userName: string) {
+    try {
+      const logs = await this.concertsService.findAllReservationLogs(userName);
+      return {
+          status: logs.length > 0 ? true : false,
+          count: logs.length,
+          data: logs,
+      };
+    } catch (error) {
+      console.error('Error fetching user concerts:', error);
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

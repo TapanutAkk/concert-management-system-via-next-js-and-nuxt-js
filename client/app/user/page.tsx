@@ -3,8 +3,8 @@
 import ConcertBuyItem from '@/components/dashboard/ConcertBuyItem';
 import React, { useState, useEffect } from 'react';
 
-const NEST_JS_API_URL = 'http://localhost:3001';
-const CURRENT_USER_NAME = 'Jack Smile'
+const NEST_JS_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const CURRENT_USER_NAME = 'Jack Smile';
 
 interface Concert {
   id: string;
