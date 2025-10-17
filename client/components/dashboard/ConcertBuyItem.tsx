@@ -8,6 +8,7 @@ interface Concert {
   name: string;
   description: string;
   totalSeats: number;
+  reservedCount: number;
   latestAction: 'RESERVE' | 'CANCEL' | null; 
 }
 
@@ -34,6 +35,8 @@ export default function ConcertBuyItem({
   } else if (currentStatus === null) {
       isCancelDisabledLogic = false;
   }
+
+  const availableSeats = Math.max(0, concert.totalSeats - (concert.reservedCount ?? 0));
 
   const isCancelDisabledFinal = isCancelDisabledLogic || isLoading;
 
@@ -73,7 +76,7 @@ export default function ConcertBuyItem({
         <div className="flex justify-between items-center mt-3">
           <div className="flex items-center text-gray-500 text-sm">
             <User className="w-4 h-4 mr-2" />
-            <span>{concert.totalSeats.toLocaleString()}</span>
+            <span>{availableSeats.toLocaleString()}</span>
           </div>
           <div className="flex items-center space-x-3">
             <button 
