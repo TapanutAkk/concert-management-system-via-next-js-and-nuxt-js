@@ -124,7 +124,6 @@ export class ConcertsService {
     return logs.map((log) => {
       const concert = concerts.find((c) => c.id === log.concertId);
 
-      // ไม่เขียนทับ createdAt (ยังคงเป็น Date) — เพิ่ม formattedAt เป็น string แยกต่างหาก
       return {
         ...log,
         concertName: concert?.name,
