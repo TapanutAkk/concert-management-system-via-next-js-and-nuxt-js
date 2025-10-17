@@ -4,12 +4,13 @@ import { Save, User } from 'lucide-react';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { concertSchema } from '@/schemas/concertSchema'; 
-import SuccessToast from '@/components/ui/SuccessToast';
+import { concertSchema } from '@/schemas/concertSchema';
 
-const NEST_JS_API_URL = 'http://localhost:3001/concerts';
+const NEST_JS_API_URL = `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/concerts`;
 
-export default function ConcertForm() {
+export default function ConcertForm({ onCreated }: { onCreated?: () => void }) {
+  const [activeTab, setActiveTab] = useState('Overview'); 
+
   const formMethods = useForm({
     resolver: zodResolver(concertSchema),
   });
@@ -21,18 +22,6 @@ export default function ConcertForm() {
     setError,
     reset 
   } = formMethods;
-
-  const [toast, setToast] = useState<{ isVisible: boolean, message: string }>({ 
-    isVisible: false, 
-    message: '' 
-  });
-
-  const closeToast = () => setToast({ isVisible: false, message: '' });
-
-  const showSuccessToast = (message: string) => {
-      setToast({ isVisible: true, message });
-      setTimeout(closeToast, 3000); 
-  };
 
   const onSubmit = async (formData: any) => {
     try {
@@ -49,7 +38,8 @@ export default function ConcertForm() {
 
         if (response.ok) {
           reset();
-          showSuccessToast('Create successfully');
+          setActiveTab('Overview');
+          if (typeof onCreated === 'function') onCreated();
         } else if (response.status === 400) {
           console.error("Server Validation Failed (400):", result);
           
@@ -157,11 +147,6 @@ export default function ConcertForm() {
             </button>
           </div>
         </form>
-        <SuccessToast
-            isVisible={toast.isVisible}
-            message={toast.message}
-            onClose={closeToast}
-        />
       </div>
   );
 }
