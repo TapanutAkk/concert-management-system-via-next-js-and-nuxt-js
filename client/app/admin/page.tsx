@@ -5,7 +5,7 @@ import ConcertListItem from '@/components/dashboard/ConcertListItem';
 import ConcertForm from '@/components/dashboard/ConcertForm';
 import React, { useState, useEffect } from 'react';
 
-const NEST_JS_API_URL = 'http://localhost:3001/concerts';
+const NEST_JS_API_URL = `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/concerts`;
 
 async function sumTotalSeat() {
   const response = await fetch(`${NEST_JS_API_URL}/seats`, {
@@ -59,7 +59,7 @@ export default function AdminHomePage() {
       setTotalSeats(result.data);
     } catch (err) {
       console.error('Fetch Error:', err);
-      setError('ไม่สามารถเชื่อมต่อเพื่อดึงผลรวมที่นั่งได้'); 
+      setError('Failed to connect for data retrieval.'); 
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +83,7 @@ export default function AdminHomePage() {
 
         if (!response.ok) {
             const errorResult = await response.json();
-            throw new Error(errorResult.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
+            throw new Error(errorResult.message || 'Failed to fetch data');
         }
 
         const result = await response.json();
