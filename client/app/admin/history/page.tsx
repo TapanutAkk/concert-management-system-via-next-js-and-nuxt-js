@@ -10,7 +10,7 @@ interface Log {
   userName: string;
   concertName: string;
   action: string;
-  createdAt: string;
+  formattedAt: string;
 }
 
 export default function AdminHistoryPage() {
@@ -60,7 +60,7 @@ export default function AdminHistoryPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                     {logs.map((log: any) => (
                         <tr key={log.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{log.createdAt}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{log.formattedAt}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{log.userName}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{log.concertName}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{log.action}</td>

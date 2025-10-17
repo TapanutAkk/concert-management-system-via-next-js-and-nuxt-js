@@ -1,7 +1,7 @@
 'use client';
 
 import { Save, User } from 'lucide-react';
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { concertSchema } from '@/schemas/concertSchema';
@@ -9,7 +9,6 @@ import { concertSchema } from '@/schemas/concertSchema';
 const NEST_JS_API_URL = `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/concerts`;
 
 export default function ConcertForm({ onCreated }: { onCreated?: () => void }) {
-  const [activeTab, setActiveTab] = useState('Overview'); 
 
   const formMethods = useForm({
     resolver: zodResolver(concertSchema),
@@ -38,7 +37,6 @@ export default function ConcertForm({ onCreated }: { onCreated?: () => void }) {
 
         if (response.ok) {
           reset();
-          setActiveTab('Overview');
           if (typeof onCreated === 'function') onCreated();
         } else if (response.status === 400) {
           console.error("Server Validation Failed (400):", result);
