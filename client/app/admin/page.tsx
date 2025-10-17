@@ -5,7 +5,7 @@ import ConcertListItem from '@/components/dashboard/ConcertListItem';
 import ConcertForm from '@/components/dashboard/ConcertForm';
 import React, { useState, useEffect } from 'react';
 
-const NEST_JS_API_URL = 'http://localhost:3001/concerts';
+const NEST_JS_API_URL = `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/concerts`;
 
 async function sumTotalSeat() {
   const response = await fetch(`${NEST_JS_API_URL}/seats`, {
