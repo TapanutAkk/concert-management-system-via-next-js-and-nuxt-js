@@ -138,4 +138,20 @@ export class ConcertsController {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @Get('reserved-seats')
+  async getReservedSum() {
+    try {
+      const reservedSum = await this.concertsService.getReservedSum();
+
+      return {
+        status: reservedSum > 0 ? true : false,
+        data: reservedSum,
+      };
+
+    } catch (error) {
+      console.error('Error fetching concerts:', error);
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }
