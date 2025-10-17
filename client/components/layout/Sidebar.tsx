@@ -3,8 +3,6 @@
 import Link from 'next/link';
 import { Home, Inbox, RefreshCcw, LogOut } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
-import { usePathname } from 'next/navigation';
-import React, { useEffect } from 'react';
 
 const navItems = [
   { name: 'Home', href: '/admin', icon: Home },
@@ -13,18 +11,6 @@ const navItems = [
 
 export default function Sidebar() {
   const { role, setRole } = useUser();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (!pathname) return;
-    if (pathname.includes('/admin') && typeof setRole === 'function') {
-      setRole('admin');
-      localStorage.setItem('role', 'admin');
-    } else if (pathname.includes('/user') && typeof setRole === 'function') {
-      setRole('user');
-      localStorage.setItem('role', 'user');
-    }
-  }, [pathname, setRole]);
 
   return (
     <div className="flex flex-col w-64 min-h-screen bg-white">

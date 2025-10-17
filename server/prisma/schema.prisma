@@ -7,28 +7,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum Action {
-  RESERVE
-  CANCEL
-}
-
 model Concert {
-  id              String   @id @default(uuid())
-  name            String   @unique
-  description     String
-  totalSeats      Int
-  reservedCount   Int      @default(0)
-  logs            ReservationLog[]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
-model ReservationLog {
   id          String   @id @default(uuid())
-  concertId   String   
-  concert     Concert  @relation(fields: [concertId], references: [id])
-  userName    String
-  action      Action
+  name        String   @unique
+  totalSeats  Int
+  description String?
   createdAt   DateTime @default(now())
-  @@index([concertId, userName, action])
+  updatedAt   DateTime @updatedAt
 }

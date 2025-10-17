@@ -81,8 +81,7 @@ Once the database container is running and the .env file is set up, run the Pris
 
 ```bash
 # Run Prisma Migrations to create the tables based on schema.prisma
-$ npx prisma migrate dev
-$ npx prisma generate
+$ npx prisma migrate dev --name init_concert_table
 ```
 
 ## Deployment

@@ -1,6 +1,6 @@
 'use client';
 
-import { User } from 'lucide-react';
+import { User, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface Concert {
@@ -8,58 +8,13 @@ interface Concert {
   name: string;
   description: string;
   totalSeats: number;
-  latestAction: 'RESERVE' | 'CANCEL' | null; 
 }
 
 interface ConcertBuyItemProps {
   concert: Concert;
-  onReserve: (concertId: number | string) => Promise<void>;
-  onCancel: (concertId: number | string) => Promise<void>;
 }
 
-export default function ConcertBuyItem({ 
-  concert, 
-  onReserve, 
-  onCancel }: ConcertBuyItemProps) {
-  const [currentStatus, setCurrentStatus] = useState(concert.latestAction); 
-  const [isLoading, setIsLoading] = useState(false);
-
-  const isReserveDisabled = currentStatus === 'RESERVE' || isLoading;
-
-  let isCancelDisabledLogic: boolean;
-  if (currentStatus === 'RESERVE') {
-      isCancelDisabledLogic = false;
-  } else if (currentStatus === 'CANCEL') {
-      isCancelDisabledLogic = true;
-  } else if (currentStatus === null) {
-      isCancelDisabledLogic = false;
-  }
-
-  const isCancelDisabledFinal = isCancelDisabledLogic || isLoading;
-
-  const handleReserve = async () => {
-    setIsLoading(true);
-    try {
-      await onReserve(concert.id);
-      setCurrentStatus('RESERVE');
-    } catch (error) {
-      console.error("Reservation failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCancel = async () => {
-    setIsLoading(true);
-    try {
-      await onCancel(concert.id);
-      setCurrentStatus('CANCEL');
-    } catch (error) {
-      console.error("Cancellation failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+export default function ConcertBuyItem({ concert }: ConcertBuyItemProps) {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-8">
@@ -75,26 +30,12 @@ export default function ConcertBuyItem({
             <User className="w-4 h-4 mr-2" />
             <span>{concert.totalSeats.toLocaleString()}</span>
           </div>
-          <div className="flex items-center space-x-3">
-            <button 
-            onClick={handleReserve}
-            disabled={isReserveDisabled}
-            className={`flex items-center px-4 py-2 text-sm text-white rounded-md 
-                       transition duration-150 shadow-md 
-                       ${isReserveDisabled  ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
-            >
-              {isLoading && isReserveDisabled ? 'Processing...' : 'Reserve'}
-            </button>
-            <button 
-            onClick={handleCancel}
-            disabled={isCancelDisabledFinal} 
-            className={`flex items-center px-4 py-2 text-sm text-white rounded-md 
-                       transition duration-150 shadow-md 
-                       ${isCancelDisabledFinal ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
-            >
-              {isLoading && isCancelDisabledFinal ? 'Processing...' : 'Cancel'}
-            </button>
-          </div>
+          <button 
+          className="flex items-center px-4 py-2 text-sm text-white bg-green-500 rounded-md 
+                      hover:bg-green-600 transition duration-150 shadow-md"
+          >
+            Reserve
+          </button>
         </div>
       </div>
     </div>
