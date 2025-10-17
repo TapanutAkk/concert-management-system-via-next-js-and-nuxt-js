@@ -4,22 +4,9 @@ import StatCard from '@/components/dashboard/StatCard';
 import ConcertListItem from '@/components/dashboard/ConcertListItem';
 import ConcertForm from '@/components/dashboard/ConcertForm';
 import React, { useState, useEffect } from 'react';
+import SuccessToast from '@/components/ui/SuccessToast';
 
 const NEST_JS_API_URL = `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/concerts`;
-
-async function sumReservedSeat() {
-  const response = await fetch(`${NEST_JS_API_URL}/reserved-seats`, {
-    method: 'GET',
-  });
-
-  if (!response.ok) {
-    const errorResult = await response.json();
-    throw new Error(errorResult.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
-  }
-
-  const result = await response.json();
-  return result.data;
-}
 
 const tabs = [
   { name: 'Overview', href: '#overview' },
@@ -41,6 +28,18 @@ export default function AdminHomePage() {
   const [error, setError] = useState<string | null>(null);
   const [totalSeats, setTotalSeats] = useState<number | null>(null);
   const [reservedSeats, setReservedSeats] = useState<number | null>(null);
+  
+  const [toast, setToast] = useState<{ isVisible: boolean, message: string }>({ 
+    isVisible: false, 
+    message: '' 
+  });
+
+  const closeToast = () => setToast({ isVisible: false, message: '' });
+
+  const showSuccessToast = (message: string) => {
+      setToast({ isVisible: true, message });
+      setTimeout(closeToast, 3000); 
+  };
 
   const fetchSeatSum = async () => {
     setIsLoading(true);
@@ -205,11 +204,21 @@ export default function AdminHomePage() {
           {activeTab === 'Create' && 
           <div>
             <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-              <ConcertForm />
+              <ConcertForm onCreated={() => {
+                showSuccessToast('Create successfully');
+                setActiveTab('Overview');
+                fetchConcerts();
+                fetchSeatSum();
+              }} />
             </div>
           </div>
           }
         </div>
+        <SuccessToast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          onClose={closeToast}
+        />
       </div>
     );
 }
