@@ -132,6 +132,7 @@ export default function AdminHomePage() {
         if (response.status === 204) {
             fetchConcerts();
             fetchSeatSum();
+            showSuccessToast('Delete successfully');
         } else if (response.status === 404) {
              alert('Cannot delete: Concert not found.');
         } else {
