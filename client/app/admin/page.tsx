@@ -7,8 +7,8 @@ import React, { useState, useEffect } from 'react';
 
 const NEST_JS_API_URL = `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/concerts`;
 
-async function sumTotalSeat() {
-  const response = await fetch(`${NEST_JS_API_URL}/seats`, {
+async function sumReservedSeat() {
+  const response = await fetch(`${NEST_JS_API_URL}/reserved-seats`, {
     method: 'GET',
   });
 
@@ -20,8 +20,6 @@ async function sumTotalSeat() {
   const result = await response.json();
   return result.data;
 }
-
-const sumSeat = sumTotalSeat();
 
 const tabs = [
   { name: 'Overview', href: '#overview' },
@@ -42,6 +40,7 @@ export default function AdminHomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalSeats, setTotalSeats] = useState<number | null>(null);
+  const [reservedSeats, setReservedSeats] = useState<number | null>(null);
 
   const fetchSeatSum = async () => {
     setIsLoading(true);
@@ -57,6 +56,28 @@ export default function AdminHomePage() {
 
       const result = await response.json();
       setTotalSeats(result.data);
+    } catch (err) {
+      console.error('Fetch Error:', err);
+      setError('Failed to connect for data retrieval.'); 
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const fetchReservedSeatSum = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${NEST_JS_API_URL}/reserved-seats`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch total seats data');
+      }
+
+      const result = await response.json();
+      setReservedSeats(result.data);
     } catch (err) {
       console.error('Fetch Error:', err);
       setError('Failed to connect for data retrieval.'); 
@@ -100,6 +121,7 @@ export default function AdminHomePage() {
   useEffect(() => {
     fetchConcerts();
     fetchSeatSum();
+    fetchReservedSeatSum();
   }, []);
 
   const deleteConcert = async (concertId) => {
@@ -124,12 +146,14 @@ export default function AdminHomePage() {
     }
   }
 
+  const canceledSeats = Math.max(0, totalSeats - (reservedSeats ?? 0));
+
   return (
       <div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatCard title="Total of seats" value={totalSeats?.toLocaleString() || 0} color="blue" logo="seats" />
-          <StatCard title="Reserve" value={stats.reserved} color="green"  logo="reserve" />
-          <StatCard title="Cancel" value={stats.cancelled} color="red"  logo="cancel" />
+          <StatCard title="Reserve" value={reservedSeats?.toLocaleString() || 0} color="green"  logo="reserve" />
+          <StatCard title="Cancel" value={canceledSeats?.toLocaleString() || 0} color="red"  logo="cancel" />
         </div>
 
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">

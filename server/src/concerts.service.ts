@@ -167,4 +167,14 @@ export class ConcertsService {
     await this.updateConcertReservedCount(concertId);
     return log;
   }
+
+  async getReservedSum(): Promise<number> {
+    const result = await this.prisma.concert.aggregate({
+      _sum: {
+        reservedCount: true,
+      },
+    });
+
+    return result._sum.reservedCount || 0; 
+  }
 }
