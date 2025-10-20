@@ -23,18 +23,6 @@ npm install
 npm run start:dev
 ```
 
-Optional, You can run tests in backend (Nest.js)
-```bash
-# unit tests
-npm run test
-
-# e2e tests
-npm run test:e2e
-
-# test coverage
-npm run test:cov
-```
-
 Run Database Container (Local)
 ```bash
 # Start PostgreSQL Container on port 5432
@@ -54,4 +42,16 @@ Apply Database Schema (Create Tables)
 # Run Prisma Migrations to create the tables based on schema.prisma
 npx prisma migrate dev --name create_concert_and_reservation_log_table
 npx prisma generate
+```
+
+Optional, You can run tests in backend (Nest.js)
+```bash
+# unit tests
+npm run test
+
+# e2e tests
+npm run test:e2e
+
+# test coverage
+npm run test:cov
 ```
