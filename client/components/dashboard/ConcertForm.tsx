@@ -2,15 +2,17 @@
 
 import { Save, User } from 'lucide-react';
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { concertSchema } from '@/schemas/concertSchema';
-
+import { z } from 'zod';
 const NEST_JS_API_URL = `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/concerts`;
 
 export default function ConcertForm({ onCreated }: { onCreated?: () => void }) {
 
-  const formMethods = useForm({
+  type ConcertFormValues = z.infer<typeof concertSchema>;
+
+  const formMethods = useForm<ConcertFormValues>({
     resolver: zodResolver(concertSchema),
   });
 
@@ -19,10 +21,10 @@ export default function ConcertForm({ onCreated }: { onCreated?: () => void }) {
     handleSubmit, 
     formState: { errors, isSubmitting },
     setError,
-    reset 
+    reset,
   } = formMethods;
 
-  const onSubmit = async (formData: any) => {
+  const onSubmit: SubmitHandler<ConcertFormValues> = async (formData) => {
     try {
         const response = await fetch(NEST_JS_API_URL, {
             method: 'POST',
