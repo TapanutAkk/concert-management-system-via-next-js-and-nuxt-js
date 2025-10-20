@@ -22,7 +22,6 @@ interface Concert {
 }
 
 export default function AdminHomePage() {
-  // const [sumTotalSeat] = await Promise.all([sumTotalSeat()]);
   const [concerts, setConcerts] = useState<Concert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,12 +84,6 @@ export default function AdminHomePage() {
     }
   };
 
-  const stats = {
-    totalSeats: 1000,
-    reserved: 350,
-    cancelled: 25,
-  };
-
   const [activeTab, setActiveTab] = useState('Overview'); 
 
   const fetchConcerts = async () => {
@@ -123,37 +116,42 @@ export default function AdminHomePage() {
     fetchReservedSeatSum();
   }, []);
 
-  const deleteConcert = async (concertId) => {
-    try {
-        const response = await fetch(`${NEST_JS_API_URL}/${concertId}`, {
-            method: 'DELETE',
-        });
-  
-        if (response.status === 204) {
-            fetchConcerts();
-            fetchSeatSum();
-            showSuccessToast('Delete successfully');
-        } else if (response.status === 404) {
-             alert('Cannot delete: Concert not found.');
-        } else {
-             const errorResult = await response.json();
-             alert(`Delete Failed: ${errorResult.message}`);
-        }
-  
-    } catch (error) {
-        console.error("Network Error:", error);
-        alert('Failed to connect to the server. Check network status.');
-    }
+  interface ApiError {
+    message?: string;
   }
 
-  const canceledSeats = Math.max(0, totalSeats - (reservedSeats ?? 0));
+  type ConcertId = string | number;
+
+  const deleteConcert = async (concertId: ConcertId): Promise<void> => {
+    try {
+      const response = await fetch(`${NEST_JS_API_URL}/${concertId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.status === 204) {
+        fetchConcerts();
+        fetchSeatSum();
+        showSuccessToast('Delete successfully');
+      } else if (response.status === 404) {
+        alert('Cannot delete: Concert not found.');
+      } else {
+        const errorResult = (await response.json()) as ApiError;
+        alert(`Delete Failed: ${errorResult.message ?? 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Network Error:', error);
+      alert('Failed to connect to the server. Check network status.');
+    }
+  };
+
+  const canceledSeats = Math.max(0, (totalSeats ?? 0) - (reservedSeats ?? 0));
 
   return (
       <div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatCard title="Total of seats" value={totalSeats?.toLocaleString() || 0} color="blue" logo="seats" />
-          <StatCard title="Reserve" value={reservedSeats?.toLocaleString() || 0} color="green"  logo="reserve" />
-          <StatCard title="Cancel" value={canceledSeats?.toLocaleString() || 0} color="red"  logo="cancel" />
+          <StatCard title="Total of seats" value={totalSeats ?? 0} color="blue" logo="seats" />
+          <StatCard title="Reserve" value={reservedSeats ?? 0} color="green"  logo="reserve" />
+          <StatCard title="Cancel" value={canceledSeats ?? 0} color="red"  logo="cancel" />
         </div>
 
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
@@ -195,11 +193,14 @@ export default function AdminHomePage() {
             {concerts.length == 0 && !isLoading && (
               <div className="p-6 text-center text-gray-500">No concerts found.</div>
             )}
-            {concerts.map((concert: any) => (
-              <ConcertListItem key={concert.id} concert={concert} onDelete={function (concertId: string | number): void {
-                deleteConcert(concertId);
-              } } />
-            ))}
+            {concerts.map((concert: Concert) => {
+              const normalizedConcert = { ...concert, description: concert.description ?? '' };
+              return (
+                <ConcertListItem key={concert.id} concert={normalizedConcert} onDelete={(concertId: string | number) => {
+                  deleteConcert(concertId);
+                }} />
+              );
+            })}
           </div>
           }
           {activeTab === 'Create' && 
