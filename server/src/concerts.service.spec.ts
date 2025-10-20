@@ -55,6 +55,10 @@ describe('ConcertsService (Reservation Log Logic)', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks(); 
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
@@ -81,6 +85,7 @@ describe('ConcertsService (Reservation Log Logic)', () => {
     });
 
     it('should throw BadRequestException if user already has an active RESERVE log', async () => {
+      const updateSpy = jest.spyOn(service as any, 'updateConcertReservedCount').mockResolvedValue(undefined);
       jest.spyOn(service as any, 'getCurrentUserStatus').mockResolvedValue(Action.RESERVE);
       
       await expect(service.logReservation(MOCK_CONCERT_ID, MOCK_USER)).rejects.toThrow(
@@ -88,9 +93,8 @@ describe('ConcertsService (Reservation Log Logic)', () => {
       );
 
       expect(prisma.reservationLog.create).not.toHaveBeenCalled();
-      expect(service['updateConcertReservedCount']).not.toHaveBeenCalled();
+      expect(updateSpy).not.toHaveBeenCalled();
     });
-    
   });
 
   describe('logCancellation', () => {
@@ -116,12 +120,12 @@ describe('ConcertsService (Reservation Log Logic)', () => {
       jest.spyOn(service as any, 'getCurrentUserStatus').mockResolvedValue(Action.CANCEL);
       
       await expect(service.logCancellation(MOCK_CONCERT_ID, MOCK_USER)).rejects.toThrow(
-        'No active reservation found to cancel.'
+        'No active reservation to cancel.'
       );
 
       jest.spyOn(service as any, 'getCurrentUserStatus').mockResolvedValue(null);
       await expect(service.logCancellation(MOCK_CONCERT_ID, MOCK_USER)).rejects.toThrow(
-        'No active reservation found to cancel.'
+        'No active reservation to cancel.'
       );
 
       expect(prisma.reservationLog.create).not.toHaveBeenCalled();
@@ -137,6 +141,16 @@ describe('ConcertsService (Reservation Log Logic)', () => {
         const result = await service.findAllAvailableForUser(MOCK_USER);
 
         expect(result[0].latestAction).toBe(Action.RESERVE);
+      });
+      
+      it('should return isCanceled: true when latest log is CANCEL', async () => {
+        mockPrismaService.reservationLog.findMany.mockResolvedValue([
+            { concertId: MOCK_CONCERT_ID, action: Action.CANCEL } as any,
+        ]);
+
+        const result = await service.findAllAvailableForUser(MOCK_USER);
+
+        expect(result[0].latestAction).toBe(Action.CANCEL);
       });
       
       it('should return latestAction: null when no logs exist for user', async () => {
